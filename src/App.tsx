@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import SignInPage from "./shared/pages/SignInPage/SignInPage";
 import GamePage from "./shared/pages/GamePage/GamePage";
 import LeaderboardPage from "./shared/pages/LeaderBoardPage/LeaderboardPage";
@@ -38,6 +38,7 @@ export default function App() {
             <Route path="/sign-in" element={<SignInPage />} />
             <Route path="/game" element={<GamePage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="*" element={<Navigate to="/" replace={true} />} />
           </Route>
         </Routes>
       </GradientBackground>
