@@ -185,10 +185,10 @@ export default function GamePage() {
           <Button variant="contained" onClick={() => setDifficulty("easy")}>
             Easy
           </Button>
-          <Button variant="contained" onClick={() => setDifficulty("medium")} sx={{ ml: 2 }}>
+          <Button variant="contained" onClick={() => setDifficulty("medium")} sx={{ ml: 2, backgroundColor: theme?.palette?.infoGreen?.main }}>
             Medium
           </Button>
-          <Button variant="contained" onClick={() => setDifficulty("hard")} sx={{ ml: 2 }}>
+          <Button variant="contained" onClick={() => setDifficulty("hard")} sx={{ ml: 2, backgroundColor: theme?.palette?.basePinkSecondary?.main }}>
             Hard
           </Button>
         </Box>
