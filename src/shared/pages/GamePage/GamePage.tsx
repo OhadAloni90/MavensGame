@@ -4,7 +4,13 @@ import { GradientLinearProgress } from "../../components/Loader/Loader";
 import GameButton from "../../components/Button/Button";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate } from "react-router-dom";
-import { IndicatorBox, LoaderBox, StyledGameBox, StyledGameEndedBox } from "./style/GameStyledBoxes";
+import {
+  IndicatorBox,
+  LoaderBox,
+  StyledGameBox,
+  StyledGameEndedBox,
+  StyledInnerIndicator,
+} from "./style/GameStyledBoxes";
 import { defaultContainerStyles, StyledGameContainer } from "../../../themes/utils/GlobalContainerStyles";
 import GameHeader from "./components/GameHeader";
 import { BASE_URL } from "../../../utils/vars";
@@ -17,7 +23,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomDelay = () => Math.floor(Math.random() * 3000) + 2000;
 
 export default function GamePage() {
-  const { showToast, state, dispatch} = useGameContext();
+  const { showToast, state, dispatch } = useGameContext();
   const navigate = useNavigate();
   // Keep a stable reference to showToast
   const showToastRef = useRef(showToast);
@@ -41,7 +47,6 @@ export default function GamePage() {
           tooSoonToastShownRef.current = true;
           showToastRef.current(UserReactionMessages["TooSoon"], "error");
         }
-        
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -105,9 +110,7 @@ export default function GamePage() {
         if (gameStateRef.current !== "SHOWING") return;
         if (reaction !== null) return;
         const key = e.key.toLowerCase();
-        const correct =
-          (expected === "left" && key === "a") ||
-          (expected === "right" && key === "d");
+        const correct = (expected === "left" && key === "a") || (expected === "right" && key === "d");
         reaction = correct ? "success" : "wrongKey";
         if (timerId !== undefined) {
           clearTimeout(timerId); // Clear the timeout once a key is pressed
@@ -127,7 +130,7 @@ export default function GamePage() {
       await fetch(`${BASE_URL}/api/saveScore`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId:state?.userId, score: scoreRef.current, success }),
+        body: JSON.stringify({ userId: state?.userId, score: scoreRef.current, success }),
       });
     } catch (err) {
       showToast("Failed to save score. Try again later!", "error");
@@ -142,7 +145,6 @@ export default function GamePage() {
     setGameState("WAITING");
     setRestartCount((prev) => prev + 1);
   };
-
   return (
     <Container
       sx={{
@@ -167,14 +169,7 @@ export default function GamePage() {
                 boxShadow: theme?.customShadows?.gameCube,
               }}
             >
-              <Box
-                sx={{
-                  backgroundColor: theme?.palette?.basePinkSecondary.main,
-                  width: "45px",
-                  height: "45px",
-                  borderRadius: "10.5px",
-                }}
-              ></Box>
+              <StyledInnerIndicator></StyledInnerIndicator>
             </IndicatorBox>
           </StyledGameBox>
         )}

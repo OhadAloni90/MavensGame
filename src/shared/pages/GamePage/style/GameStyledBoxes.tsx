@@ -37,3 +37,9 @@ export const LoaderBox = styled(Box)(({ theme }) => ({
     flexDirection: "column",
     justifyContent: "center",
   }))
+  export const StyledInnerIndicator = styled(Box)(({theme}) => ({
+      backgroundColor: theme?.palette?.basePinkSecondary.main,
+      width: "45px",
+      height: "45px",
+      borderRadius: "10.5px",
+  }))

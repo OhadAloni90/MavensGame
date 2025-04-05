@@ -1,9 +1,9 @@
 import { AppBar, styled, Toolbar } from "@mui/material";
 import { headerShadow } from "../../../../themes/utils/shadows";
-
-export const StyledAppBar = styled(AppBar)(({ theme }) => ({
+import theme from "../../../../themes";
+export const StyledAppBar = styled(AppBar)(({  }) => ({
     backgroundColor: theme.palette.primary.main,
-    boxShadow: headerShadow[1],
+    boxShadow: theme?.customShadows?.header,
     position: "fixed", // or "sticky"
     top: 0,
     left: 0,
