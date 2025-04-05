@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { Box, Typography, Button, Container } from "@mui/material";
-import { UserContext } from "../../../App";
 import { GradientLinearProgress } from "../../components/Loader/Loader";
 import GameButton from "../../components/Button/Button";
 import SendIcon from "@mui/icons-material/Send";
@@ -18,12 +17,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomDelay = () => Math.floor(Math.random() * 3000) + 2000;
 
 export default function GamePage() {
-  const { userId } = useContext(UserContext);
-  const { showToast, state, dispatch } = useGameContext();
+  const { showToast, state, dispatch} = useGameContext();
   const navigate = useNavigate();
   // Keep a stable reference to showToast
   const showToastRef = useRef(showToast);
- 
   // Game states
   const [gameState, setGameState] = useState<GameState>("WAITING");
   const [score, setScore] = useState<number>(0);
@@ -33,7 +30,7 @@ export default function GamePage() {
   useEffect(() => {
     showToastRef.current = showToast;
   }, [showToast]);
-  // Inside your GamePage component
+  // Inside  GamePage component
   const tooSoonToastShownRef = useRef(false);
   // Global key listener for "waiting" mode:
   useEffect(() => {
@@ -53,12 +50,16 @@ export default function GamePage() {
     };
   }, []);
   useEffect(() => {
+    if (!state?.userId) {
+      showToast("Failed to Authenticate user. Returning to log-in page.", "error");
+      navigate("/");
+    }
     gameStateRef.current = gameState;
   }, [gameState]);
   const [restartCount, setRestartCount] = useState(0);
   const gameLoopInstanceIdRef = useRef(0);
   useEffect(() => {
-    if (!userId) return;
+    if (!state?.userId) return;
     gameLoopInstanceIdRef.current++;
     const currentInstanceId = gameLoopInstanceIdRef.current;
     const runGameLoop = async () => {
@@ -88,7 +89,7 @@ export default function GamePage() {
     return () => {
       gameLoopInstanceIdRef.current++;
     };
-  }, [userId, restartCount]);
+  }, [state?.userId, restartCount]);
   // Wait for correct key press
   const waitForKeyPress = (
     expected: "left" | "right",
@@ -96,17 +97,23 @@ export default function GamePage() {
   ): Promise<"success" | "wrongKey" | "tooLate"> => {
     return new Promise((resolve) => {
       let reaction: "success" | "wrongKey" | null = null;
+      let timerId: number | undefined; // Declare timerId here
       const onKeyDown = (e: KeyboardEvent) => {
         if (gameStateRef.current !== "SHOWING") return;
         if (reaction !== null) return;
         const key = e.key.toLowerCase();
         const correct =
-          (expected === "left" && ( key === "a" )) ||
-          (expected === "right" && ( key === "d" ));
+          (expected === "left" && key === "a") ||
+          (expected === "right" && key === "d");
         reaction = correct ? "success" : "wrongKey";
+        if (timerId !== undefined) {
+          clearTimeout(timerId); // Clear the timeout once a key is pressed
+        }
+        window.removeEventListener("keydown", onKeyDown);
+        resolve(reaction);
       };
       window.addEventListener("keydown", onKeyDown);
-      setTimeout(() => {
+      timerId = window.setTimeout(() => {
         window.removeEventListener("keydown", onKeyDown);
         resolve(reaction !== null ? reaction : "tooLate");
       }, timeout);
@@ -117,10 +124,10 @@ export default function GamePage() {
       await fetch(`${BASE_URL}/api/saveScore`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, score: scoreRef.current, success }),
+        body: JSON.stringify({ userId:state?.userId, score: scoreRef.current, success }),
       });
     } catch (err) {
-      showToast('Failed to save score. Try again later!', 'error')
+      showToast("Failed to save score. Try again later!", "error");
       console.error("Failed to save score:", err);
     }
   };
@@ -141,7 +148,7 @@ export default function GamePage() {
     >
       <StyledGameContainer>
         {/*  In-game header */}
-        {state.playerName && <GameHeader gameState={gameState} playerName={state.playerName} score={score} />}
+        {state.username && <GameHeader gameState={gameState} playerName={state.username} score={score} />}
         {/* WAITING / SHOWING / ENDED inside the same container */}
         {gameState === "WAITING" && (
           <LoaderBox>
@@ -169,8 +176,7 @@ export default function GamePage() {
           </StyledGameBox>
         )}
         {gameState === "ENDED" && (
-          <StyledGameEndedBox
-          >
+          <StyledGameEndedBox>
             <Typography
               variant="mavensBigTitleBold"
               sx={{ color: theme?.palette?.infoRed?.main, fontWeight: "bold", mb: 4 }}

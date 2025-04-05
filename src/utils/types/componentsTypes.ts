@@ -8,7 +8,6 @@ export type GameButtonProps = {
     onClick: () => void;
   } & Omit<ButtonProps, 'startIcon' | 'endIcon'>; 
   // We omit the built-in startIcon/endIcon so we can control them ourselves.
-  
 export type HeaderProps = {
   text: string;
 };

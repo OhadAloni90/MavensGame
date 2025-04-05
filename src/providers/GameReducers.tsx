@@ -1,18 +1,19 @@
 import { UIAction,GameState } from "../utils/types/UITypes";
 export const initialState: GameState = {
   userId: null,
+  username: '',
   toast: {
     open: false,
     message: '',
     severity: 'success',
   },
   isLoading: false,
-  playerName: ''
+
 };
 export function GameReducer(state: GameState, action: UIAction): GameState {
   switch (action.type) {
     case 'SET_USER':
-      return { ...state, userId: action.payload, playerName: action?.payload };
+      return { ...state, userId: action.payload.userId, username: action.payload.username };
     case 'SHOW_TOAST':
       return { ...state, toast: { open: true, message: action.payload.message, severity: action.payload.severity } };
     case 'HIDE_TOAST':

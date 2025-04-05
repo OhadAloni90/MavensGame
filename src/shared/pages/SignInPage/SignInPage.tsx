@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Container, Typography, Box, InputAdornment, IconButton } from '@mui/material';
-import { UserContext } from '../../../App';
 import GameButton from '../../components/Button/Button';
 import GameContainer from '../../components/GameContainer/GameContainer';
 import theme from '../../../themes';
@@ -14,14 +13,13 @@ import ClearIcon from '@mui/icons-material/Clear';
 export default function SignInPage() {
   const [username, setUsername] = useState('');
   const [usernameError, setUsernameError] = useState(false);
-  const { setUserId } = useContext(UserContext);
   const navigate = useNavigate();
-  const { showToast, setUser } = useGameContext();
+  const { showToast, setUser,state } = useGameContext();
   const handleUserType = (e: React.ChangeEvent<HTMLInputElement>) => {
     if(!e || !e?.target?.value) return ;
     setUsernameError(false);
     setUsername(e.target.value);
-    setUser(e.target.value);
+    setUser({ userId: state.userId ?? '', username: e.target.value });
   };
   const handleClear = () => {
     setUsername('');
@@ -40,15 +38,14 @@ export default function SignInPage() {
       });
       const data = await res.json();
       if (data.userId) {
-        setUserId(data.userId);
+        setUser({ userId: data.userId, username });
         navigate('/game');
       }
     } catch (error) {
       showToast('Failed to retrieve user information. Try again', 'error');
       console.error('Failed to get userId:', error);
-    } 
+    }
   };
-  
   return (
     <Container  sx={{
       ...defaultContainerStyles

@@ -7,13 +7,6 @@ import Header from "./shared/components/Header/Header";
 import GradientBackground from "./themes/utils/backgrounds";
 import { Box } from "@mui/material";
 import { MainProvider } from "./providers/GameContext";
-export const UserContext = React.createContext<{
-  userId: string;
-  setUserId: React.Dispatch<React.SetStateAction<string>>;
-}>({
-  userId: "",
-  setUserId: () => {},
-});
 
 export default function App() {
   const [userId, setUserId] = React.useState("");
@@ -35,18 +28,8 @@ export default function App() {
     );
   };
   return (
-    <UserContext.Provider value={{ userId, setUserId }}>
       <MainProvider>
-        <GradientBackground
-          sx={{
-            width: "100vw",
-            height: "100vh",          // Fill the entire viewport
-            display: "flex",
-            flexDirection: "column",  // So children can be stacked vertically
-            margin: 0,
-            padding: 0,
-                  }}
-        >
+        <GradientBackground>
           <Routes>
             <Route path="/" element={<Layout />}>
             <Route index  element={<SignInPage />} />
@@ -57,6 +40,5 @@ export default function App() {
           </Routes>
         </GradientBackground>
       </MainProvider>
-    </UserContext.Provider>
   );
 }

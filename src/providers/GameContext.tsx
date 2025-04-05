@@ -8,7 +8,7 @@ type GameContextProps = {
   dispatch: React.Dispatch<UIAction>;
   showToast: (message: string, severity?: ToastSeverity) => void;
   onSetLoading: (loading: boolean) => void;
-  setUser: (user: string) => void;
+  setUser: (user: { userId: string; username: string }) => void;
 };
 
 const GameContext = createContext<GameContextProps | undefined>(undefined);
@@ -21,12 +21,10 @@ export const MainProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setTimeout(() => dispatch({ type: "HIDE_TOAST" }), 2000);
     }
   };
-  
-
   const onSetLoading = (loading: boolean) => {
     dispatch({ type: "LOADING", payload: loading });
   };
-  const setUser = (user: string) => {
+  const setUser = (user: { userId: string; username: string }) => {
     dispatch({ type: "SET_USER", payload: user });
   };
   return (
