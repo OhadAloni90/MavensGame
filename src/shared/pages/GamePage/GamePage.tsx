@@ -18,16 +18,15 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomDelay = () => Math.floor(Math.random() * 3000) + 2000;
 
 export default function GamePage() {
+  // Add difficulty state; initially null means no selection yet.
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard" | null>(null);
   const directions: ("left" | "right" | "up" | "down")[] = ["left", "right", "up", "down"];
   const randomDirection = (): "left" | "right" | "up" | "down" =>
     directions[Math.floor(Math.random() * directions.length)];
-
   const { userId } = useContext(UserContext);
   const { showToast, state, dispatch } = useGameContext();
   const navigate = useNavigate();
-  // Keep a stable reference to showToast
   const showToastRef = useRef(showToast);
-
   // Game states
   const [gameState, setGameState] = useState<GameState>("WAITING");
   const [score, setScore] = useState<number>(0);
@@ -37,14 +36,13 @@ export default function GamePage() {
   useEffect(() => {
     showToastRef.current = showToast;
   }, [showToast]);
-  // Inside your GamePage component
-  const tooSoonToastShownRef = useRef(false);
+
   // Global key listener for "waiting" mode:
+  const tooSoonToastShownRef = useRef(false);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameStateRef.current === "WAITING" && !tooSoonToastShownRef.current) {
         const key = e.key.toLowerCase();
-        // Check for any valid input key: "a", "d", "w", or "s"
         if (["a", "d", "w", "s"].includes(key)) {
           tooSoonToastShownRef.current = true;
           showToastRef.current(UserReactionMessages["TooSoon"], "error");
@@ -52,17 +50,17 @@ export default function GamePage() {
       }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
   useEffect(() => {
     gameStateRef.current = gameState;
   }, [gameState]);
+
   const [restartCount, setRestartCount] = useState(0);
   const gameLoopInstanceIdRef = useRef(0);
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || difficulty === null) return; // Wait until difficulty is chosen
     gameLoopInstanceIdRef.current++;
     const currentInstanceId = gameLoopInstanceIdRef.current;
     const runGameLoop = async () => {
@@ -75,7 +73,10 @@ export default function GamePage() {
         setIndicatorSide(side);
         setGameState("SHOWING");
         dispatch({ type: "HIDE_TOAST" });
-        const reactionResult = await waitForKeyPress(side, 1000);
+        // Use timeout based on difficulty
+        const timeout =
+          difficulty === "hard" ? 1000 : difficulty === "medium" ? 2000 : 3000;
+        const reactionResult = await waitForKeyPress(side, timeout);
         if (reactionResult === "success") {
           playSound("/sounds/smb_coin.wav");
           scoreRef.current += 1;
@@ -84,7 +85,10 @@ export default function GamePage() {
         } else {
           playSound("/sounds/smb_bump.wav");
           setGameState("ENDED");
-          showToastRef.current(UserReactionMessages[reactionResult === "tooLate" ? "TooLate" : "WrongKey"], "error");
+          showToastRef.current(
+            UserReactionMessages[reactionResult === "tooLate" ? "TooLate" : "WrongKey"],
+            "error"
+          );
           await saveScore(false);
           break;
         }
@@ -94,36 +98,45 @@ export default function GamePage() {
     return () => {
       gameLoopInstanceIdRef.current++;
     };
-  }, [userId, restartCount]);
-  // Wait for correct key press
+  }, [userId, restartCount, difficulty]);
+
   const waitForKeyPress = (
     expected: "left" | "right" | "up" | "down",
     timeout: number
   ): Promise<"success" | "wrongKey" | "tooLate"> => {
     return new Promise((resolve) => {
-      let reaction: "success" | "wrongKey" | null = null;
+      let resolved = false;
       const onKeyDown = (e: KeyboardEvent) => {
         if (gameStateRef.current !== "SHOWING") return;
-        if (reaction !== null) return;
         const key = e.key.toLowerCase();
         const correct =
           (expected === "left" && key === "a") ||
           (expected === "right" && key === "d") ||
           (expected === "up" && key === "w") ||
           (expected === "down" && key === "s");
-        reaction = correct ? "success" : "wrongKey";
+        const reaction = correct ? "success" : "wrongKey";
+        if (!resolved) {
+          resolved = true;
+          window.removeEventListener("keydown", onKeyDown);
+          clearTimeout(timeoutId);
+          resolve(reaction);
+        }
       };
       window.addEventListener("keydown", onKeyDown);
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         window.removeEventListener("keydown", onKeyDown);
-        resolve(reaction !== null ? reaction : "tooLate");
+        if (!resolved) {
+          resolved = true;
+          resolve("tooLate");
+        }
       }, timeout);
     });
   };
-  const playSound = (src: string) => {
+    const playSound = (src: string) => {
     const audio = new Audio(src);
     audio.play().catch((err) => console.error("Audio play error:", err));
   };
+
   const saveScore = async (success: boolean) => {
     try {
       await fetch(`${BASE_URL}/api/saveScore`, {
@@ -136,25 +149,43 @@ export default function GamePage() {
       console.error("Failed to save score:", err);
     }
   };
-  // Restart
+
   const handleRestart = () => {
     setScore(0);
     scoreRef.current = 0;
     setIndicatorSide(null);
     setGameState("WAITING");
     setRestartCount((prev) => prev + 1);
+    setDifficulty(null); 
   };
 
+  // If difficulty is not set, show the selection UI:
+  if (difficulty === null) {
+    return (
+      <Container sx={defaultContainerStyles}>
+        <Typography variant="mavensBigTitleBold" mt={10}>
+          Select Difficulty
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Button variant="contained" onClick={() => setDifficulty("easy")}>
+            Easy
+          </Button>
+          <Button variant="contained" onClick={() => setDifficulty("medium")} sx={{ ml: 2 }}>
+            Medium
+          </Button>
+          <Button variant="contained" onClick={() => setDifficulty("hard")} sx={{ ml: 2 }}>
+            Hard
+          </Button>
+        </Box>
+      </Container>
+    );
+  }
+
+  // Otherwise, render the game UI:
   return (
-    <Container
-      sx={{
-        ...defaultContainerStyles,
-      }}
-    >
+    <Container sx={defaultContainerStyles}>
       <StyledGameContainer>
-        {/*  In-game header */}
         {state.playerName && <GameHeader gameState={gameState} playerName={state.playerName} score={score} />}
-        {/* WAITING / SHOWING / ENDED inside the same container */}
         {gameState === "WAITING" && (
           <LoaderBox>
             <GradientLinearProgress variant="indeterminate" />
@@ -164,14 +195,15 @@ export default function GamePage() {
           <StyledGameBox>
             <IndicatorBox
               sx={{
-                // Position based on the direction
                 ...(indicatorSide === "left" && { left: "20%" }),
                 ...(indicatorSide === "right" && { right: "20%" }),
                 ...(indicatorSide === "up" && { top: "20%", left: "50%", transform: "translateX(-50%)" }),
                 ...(indicatorSide === "down" && { bottom: "-40%", left: "50%", transform: "translateX(-50%)" }),
                 boxShadow: theme?.customShadows?.gameCube,
-                animation: `${moveUpFade} 1s forwards`,
-              }}
+                animation: `${moveUpFade} ${
+                  difficulty === "hard" ? 1 : difficulty === "medium" ? 2 : 3
+                }s forwards`, // Dynamically set animation duration based on difficulty
+                          }}
             >
               <Box
                 sx={{
@@ -180,16 +212,13 @@ export default function GamePage() {
                   height: "45px",
                   borderRadius: "10.5px",
                 }}
-              ></Box>
+              />
             </IndicatorBox>
           </StyledGameBox>
         )}
         {gameState === "ENDED" && (
           <StyledGameEndedBox>
-            <Typography
-              variant="mavensBigTitleBold"
-              sx={{ color: theme?.palette?.infoRed?.main, fontWeight: "bold", mb: 4 }}
-            >
+            <Typography variant="mavensBigTitleBold" sx={{ color: theme?.palette?.infoRed?.main, fontWeight: "bold", mb: 4 }}>
               GAME OVER!
             </Typography>
             <Typography variant="mavensBigTitleBold" sx={{ mb: 4 }}>
@@ -205,7 +234,7 @@ export default function GamePage() {
                 text="Restart Game"
                 icon={<SendIcon />}
                 iconPosition="start"
-                fullWidth={true}
+                fullWidth
                 onClick={handleRestart}
               />
             </Box>
