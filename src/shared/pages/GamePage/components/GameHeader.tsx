@@ -15,17 +15,16 @@ const StyledGameHeaderBox = styled(Box, {
   boxShadow: theme.customShadows.gameHeader,
   padding: '20px',
 }));
-
 const GameHeader: React.FC<GameHeaderProps> = ({ gameState, playerName, score }) => {
   return (
     <StyledGameHeaderBox gameState={gameState}>
-      <Typography variant="mavensSubTitle" sx={{ fontWeight: 600 }}>
+      <Typography variant="mavensSubTitle" sx={{ color: theme.palette.primary.main }}>
         [{playerName}]
       </Typography>
       {gameState !== "ENDED" && (
         <Typography
           variant="mavensSubTitle"
-          sx={{ color: theme.palette.basePinkSecondary.main, fontWeight: 600 }}
+          sx={{ color: theme.palette.basePinkSecondary.main }}
         >
           [Score {score}]
         </Typography>
