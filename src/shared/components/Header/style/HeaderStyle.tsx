@@ -1,4 +1,4 @@
-import { AppBar, styled } from "@mui/material";
+import { AppBar, styled, Toolbar } from "@mui/material";
 import { headerShadow } from "../../../../themes/utils/shadows";
 
 export const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -10,4 +10,9 @@ export const StyledAppBar = styled(AppBar)(({ theme }) => ({
     right: 0,
     height: 40,
   }));
-  
+  export const StyledHeaderToolbar = styled(Toolbar)(({ theme }) => ({
+    minHeight: "40px !important",
+    display: "flex",
+    alignItems: "center",
+    px: 2,
+  }))

@@ -21,8 +21,8 @@ export default function ToastMessage({ open, message, severity = "success", onCl
           <path
             d="M13.4375 8.125L8.85156 12.5L6.5625 10.3125"
             stroke="white"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       </SvgIcon>
@@ -36,8 +36,8 @@ export default function ToastMessage({ open, message, severity = "success", onCl
             d="M10 17.5C14.1421 17.5 17.5 14.1421 17.5 10C17.5 5.85786 14.1421 2.5 10 2.5C5.85786 2.5 2.5 5.85786 2.5 10C2.5 14.1421 5.85786 17.5 10 17.5Z"
             fill="#F04747"
           />
-          <path d="M7.5 7.50024L12.5 12.5002" stroke="white" stroke-linecap="round" />
-          <path d="M12.5 7.50024L7.5 12.5002" stroke="white" stroke-linecap="round" />
+          <path d="M7.5 7.50024L12.5 12.5002" stroke="white" strokeLinecap="round" />
+          <path d="M12.5 7.50024L7.5 12.5002" stroke="white" strokeLinecap="round" />
         </svg>
       </SvgIcon>
     );

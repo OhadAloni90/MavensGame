@@ -30,7 +30,6 @@ export default function GamePage() {
   useEffect(() => {
     showToastRef.current = showToast;
   }, [showToast]);
-  // Inside  GamePage component
   const tooSoonToastShownRef = useRef(false);
   // Global key listener for "waiting" mode:
   useEffect(() => {
@@ -38,10 +37,11 @@ export default function GamePage() {
       // Only trigger if game state is WAITING
       if (gameStateRef.current === "WAITING" && !tooSoonToastShownRef.current) {
         const key = e.key.toLowerCase();
-        if (key === "w" || key === "d") {
+        if (key === "a" || key === "d") {
           tooSoonToastShownRef.current = true;
           showToastRef.current(UserReactionMessages["TooSoon"], "error");
         }
+        
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -53,6 +53,9 @@ export default function GamePage() {
     if (!state?.userId) {
       showToast("Failed to Authenticate user. Returning to log-in page.", "error");
       navigate("/");
+    }
+    if (gameState === "WAITING") {
+      tooSoonToastShownRef.current = false;
     }
     gameStateRef.current = gameState;
   }, [gameState]);
