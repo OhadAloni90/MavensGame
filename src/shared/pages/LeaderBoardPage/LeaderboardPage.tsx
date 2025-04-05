@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, SvgIcon } from "@mui/material";
+import { Container, Typography,  TableBody, TableCell, TableHead,  SvgIcon } from "@mui/material";
 import theme from "../../../themes";
 import GameButton from "../../components/Button/Button";
 import { useNavigate } from "react-router-dom";
