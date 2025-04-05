@@ -56,7 +56,6 @@ export const StyledTable = styled(Table)(({ theme }) => ({
 
 export const StyledHeaderTableRow = styled(TableRow)(({ theme }) => ({
     backgroundColor: theme.palette.basePink02.main,
-    // If you want to override the borders on header cells, you can also target them via a nested selector in the table.
   }));
   export const SpecialTableCell = styled(TableCell, {
     shouldForwardProp: (prop) => prop !== "isWinner",
