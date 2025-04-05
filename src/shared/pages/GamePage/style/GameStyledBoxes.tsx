@@ -1,4 +1,4 @@
-import { Box, styled } from "@mui/material";
+import { Box, keyframes, styled } from "@mui/material";
 
 export const LoaderBox = styled(Box)(({ theme }) => ({
     width: '555px',
@@ -43,3 +43,17 @@ export const LoaderBox = styled(Box)(({ theme }) => ({
       height: "45px",
       borderRadius: "10.5px",
   }))
+  export const moveUpFade = keyframes`
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+`;
+
+export const AnimatedIndicator = styled(Box)(({ theme }) => ({
+  animation: `${moveUpFade} 1s forwards`, // runs for 1 second
+}));
