@@ -76,8 +76,14 @@ export default function GamePage() {
   const gameLoopInstanceIdRef = useRef(0);
 
   useEffect(() => {
-    // Wait until difficulty is chosen before starting the game loop.
-    if ((!state?.userId || difficulty === null) && gameState !== 'WAITING') return showToast("Failed to Authenticate user. Returning to log-in page.", "error");
+    // First, if user is not authenticated, navigate away.
+    if (!state?.userId) {
+      showToast("Failed to Authenticate user. Returning to log-in page.", "error");
+      navigate("/");
+      return;
+    }
+    // Do nothing if difficulty is not chosen.
+    if (difficulty === null) return;
     gameLoopInstanceIdRef.current++;
     const currentInstanceId = gameLoopInstanceIdRef.current;
     const runGameLoop = async () => {
@@ -90,8 +96,9 @@ export default function GamePage() {
         setIndicatorSide(side);
         setGameState("SHOWING");
         dispatch({ type: "HIDE_TOAST" });
-        // Set timeout based on difficulty: hard=1000, medium=2000, easy=3000 ms.
-        const timeout = difficulty === "hard" ? 1000 : difficulty === "medium" ? 2000 : 3000;
+        // Timeout based on difficulty: hard=1000ms, medium=2000ms, easy=3000ms.
+        const timeout =
+          difficulty === "hard" ? 1000 : difficulty === "medium" ? 2000 : 3000;
         const reactionResult = await waitForKeyPress(side, timeout);
         if (reactionResult === "success") {
           playSound("/sounds/smb_coin.wav");
@@ -101,7 +108,10 @@ export default function GamePage() {
         } else {
           playSound("/sounds/smb_bump.wav");
           setGameState("ENDED");
-          showToastRef.current(UserReactionMessages[reactionResult === "tooLate" ? "TooLate" : "WrongKey"], "error");
+          showToastRef.current(
+            UserReactionMessages[reactionResult === "tooLate" ? "TooLate" : "WrongKey"],
+            "error"
+          );
           await saveScore(false);
           break;
         }
@@ -112,7 +122,7 @@ export default function GamePage() {
       gameLoopInstanceIdRef.current++;
     };
   }, [state?.userId, restartCount, difficulty, dispatch]);
-
+  
   // Wait for correct key press. If a key is pressed, resolve immediately.
   const waitForKeyPress = (
     expected: "left" | "right" | "up" | "down",
