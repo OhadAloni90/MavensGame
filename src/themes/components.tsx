@@ -1,4 +1,3 @@
-// theme/components.ts
 import { Theme } from "@mui/material/styles";
 import {  CSSObject } from "@mui/system";
 
