@@ -19,7 +19,8 @@ import { UserReactionMessages } from "../../../utils/enums";
 import { useGameContext } from "../../../providers/GameContext";
 import { GameState } from "../../../utils/types/gameTypes";
 import theme from "../../../themes";
-
+import KeyboardDisplay from "../../components/KeyboardDisplay/DiamondKeyboardDisplay";
+import DiamondKeyboard from "../../components/KeyboardDisplay/DiamondKeyboardDisplay";
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomDelay = () => Math.floor(Math.random() * 3000) + 2000;
 
@@ -41,11 +42,9 @@ export default function GamePage() {
   const scoreRef = useRef<number>(0);
   const [indicatorSide, setIndicatorSide] = useState<"left" | "right" | "up" | "down" | null>(null);
   const gameStateRef = useRef(gameState);
-
   useEffect(() => {
     showToastRef.current = showToast;
   }, [showToast]);
-
   // Global key listener for "waiting" mode:
   const tooSoonToastShownRef = useRef(false);
   useEffect(() => {
@@ -97,8 +96,7 @@ export default function GamePage() {
         setGameState("SHOWING");
         dispatch({ type: "HIDE_TOAST" });
         // Timeout based on difficulty: hard=1000ms, medium=2000ms, easy=3000ms.
-        const timeout =
-          difficulty === "hard" ? 1000 : difficulty === "medium" ? 2000 : 3000;
+        const timeout = difficulty === "hard" ? 1000 : difficulty === "medium" ? 2000 : 3000;
         const reactionResult = await waitForKeyPress(side, timeout);
         if (reactionResult === "success") {
           playSound("/sounds/smb_coin.wav");
@@ -108,10 +106,7 @@ export default function GamePage() {
         } else {
           playSound("/sounds/smb_bump.wav");
           setGameState("ENDED");
-          showToastRef.current(
-            UserReactionMessages[reactionResult === "tooLate" ? "TooLate" : "WrongKey"],
-            "error"
-          );
+          showToastRef.current(UserReactionMessages[reactionResult === "tooLate" ? "TooLate" : "WrongKey"], "error");
           await saveScore(false);
           break;
         }
@@ -122,7 +117,7 @@ export default function GamePage() {
       gameLoopInstanceIdRef.current++;
     };
   }, [state?.userId, restartCount, difficulty, dispatch]);
-  
+
   // Wait for correct key press. If a key is pressed, resolve immediately.
   const waitForKeyPress = (
     expected: "left" | "right" | "up" | "down",
@@ -175,6 +170,18 @@ export default function GamePage() {
     }
   };
 
+  const mapDirectionToKey = (dir: "left" | "right" | "up" | "down"): "w" | "a" | "s" | "d" => {
+    switch (dir) {
+      case "left":
+        return "a";
+      case "right":
+        return "d";
+      case "up":
+        return "w";
+      case "down":
+        return "s";
+    }
+  };
   const handleRestart = () => {
     setScore(0);
     scoreRef.current = 0;
@@ -195,10 +202,18 @@ export default function GamePage() {
           <Button variant="contained" onClick={() => setDifficulty("easy")}>
             Easy
           </Button>
-          <Button variant="contained" onClick={() => setDifficulty("medium")} sx={{ ml: 2, backgroundColor: theme?.palette?.infoGreen?.main }}>
+          <Button
+            variant="contained"
+            onClick={() => setDifficulty("medium")}
+            sx={{ ml: 2, backgroundColor: theme?.palette?.infoGreen?.main }}
+          >
             Medium
           </Button>
-          <Button variant="contained" onClick={() => setDifficulty("hard")} sx={{ ml: 2, backgroundColor: theme?.palette?.basePinkSecondary?.main }}>
+          <Button
+            variant="contained"
+            onClick={() => setDifficulty("hard")}
+            sx={{ ml: 2, backgroundColor: theme?.palette?.basePinkSecondary?.main }}
+          >
             Hard
           </Button>
         </Box>
@@ -217,21 +232,24 @@ export default function GamePage() {
           </LoaderBox>
         )}
         {gameState === "SHOWING" && indicatorSide && (
-          <StyledGameBox>
-            <IndicatorBox
-              sx={{
-                ...(indicatorSide === "left" && { left: "20%" }),
-                ...(indicatorSide === "right" && { right: "20%" }),
-                ...(indicatorSide === "up" && { top: "20%", left: "50%", transform: "translateX(-50%)" }),
-                ...(indicatorSide === "down" && { bottom: "-40%", left: "50%", transform: "translateX(-50%)" }),
-                boxShadow: theme?.customShadows?.gameCube,
-                // Dynamically set animation duration based on difficulty:
-                animation: `${moveUpFade} ${difficulty === "hard" ? 1 : difficulty === "medium" ? 2 : 3}s forwards`,
-              }}
-            >
-              <StyledInnerIndicator />
-            </IndicatorBox>
-          </StyledGameBox>
+          <>
+            <StyledGameBox>
+              <IndicatorBox
+                sx={{
+                  ...(indicatorSide === "left" && { left: "20%" }),
+                  ...(indicatorSide === "right" && { right: "20%" }),
+                  ...(indicatorSide === "up" && { top: "20%", left: "50%", transform: "translateX(-50%)" }),
+                  ...(indicatorSide === "down" && { bottom: "-40%", left: "50%", transform: "translateX(-50%)" }),
+                  boxShadow: theme?.customShadows?.gameCube,
+                  // Dynamically set animation duration based on difficulty:
+                  animation: `${moveUpFade} ${difficulty === "hard" ? 1 : difficulty === "medium" ? 2 : 3}s forwards`,
+                }}
+              >
+                <StyledInnerIndicator />
+              </IndicatorBox>
+            </StyledGameBox>
+            <DiamondKeyboard activeKey={mapDirectionToKey(indicatorSide)} />
+          </>
         )}
         {gameState === "ENDED" && (
           <StyledGameEndedBox>
@@ -258,6 +276,7 @@ export default function GamePage() {
                 onClick={handleRestart}
               />
             </Box>
+
           </StyledGameEndedBox>
         )}
       </StyledGameContainer>
