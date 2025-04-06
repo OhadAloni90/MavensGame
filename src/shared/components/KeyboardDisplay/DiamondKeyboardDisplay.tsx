@@ -6,78 +6,63 @@ interface DiamondKeyboardProps {
 }
 const clickEffect = keyframes`
   0% { transform: scale(1); }
-    25% { transform: scale(1.2); }
+  25% { transform: scale(1.2); }
   50% { transform: scale(0.8); }
-    50% { transform: scale(1.2); }
+  75% { transform: scale(1.2); }
   100% { transform: scale(1); }
 `;
 const DiamondContainer = styled(Box)(({ theme }) => ({
   position: 'absolute',
-  bottom: '15%',
-  left: 'calc(50% - 60px)',
-  width: '80px',
-  height: '80px',
+  bottom: '10%',
+  right: 'calc(50% - 60px)',
+  width: '120px',
+  height: '120px',
 }));
-const DiamondKey = styled(Box)<{ isActive?: boolean; posX: number; posY: number }>(
-  ({ theme, isActive, posX, posY }) => ({
+const DiamondKey = styled(Box, {
+  shouldForwardProp: (prop) => !["$isActive", "$posX", "$posY"].includes(prop as string),
+})<{ $isActive?: boolean; $posX: number; $posY: number }>(
+  ({ theme, $isActive, $posX, $posY }) => ({
     position: "absolute",
     width: "40px",
     height: "40px",
     lineHeight: "40px",
     borderRadius: "4px",
-    backgroundColor: theme?.palette?.baseGray3?.main,
-    color: theme?.palette?.baseWhite?.main,
+    backgroundColor: theme.palette.baseGray3.main,
+    color: theme.palette.baseWhite.main,
     fontFamily: "'Montserrat', sans-serif",
     fontWeight: 500,
     textTransform: "uppercase",
     textAlign: "center",
     userSelect: "none",
-    left: `${posX}px`,
-    top: `${posY}px`,
+    left: `${$posX}px`,
+    top: `${$posY}px`,
     transition: "all 0.5s ease-out",
-    border: `3px solid ${theme?.palette?.primary?.main}`,
+    border: `3px solid ${theme.palette.primary.main}`,
     boxShadow: "inset 0 0 3px rgba(0,0,0,0.5)",
-    ...(isActive && {
+    ...($isActive && {
       animation: `${clickEffect} 0.5s ease-out 3`,
-      backgroundColor: theme?.palette?.basePinkSecondary?.main,
-      color: theme?.palette?.baseWhite?.main,
+      backgroundColor: theme.palette.basePinkSecondary.main,
+      color: "#000",
     }),
   })
 );
-
 const DiamondKeyboard: React.FC<DiamondKeyboardProps> = ({ activeKey }) => {
   return (
     <DiamondContainer>
       {/* W at top */}
-      <DiamondKey
-        isActive={activeKey === "w"}
-        posX={40}
-        posY={0}
-      >
+      <DiamondKey $isActive={activeKey === "w"} $posX={40} $posY={0}>
         W
       </DiamondKey>
       {/* A on left */}
-      <DiamondKey
-        isActive={activeKey === "a"}
-        posX={-20}
-        posY={50}
-      >
+      <DiamondKey $isActive={activeKey === "a"} $posX={-20} $posY={50}>
         A
       </DiamondKey>
       {/* D on right */}
-      <DiamondKey
-        isActive={activeKey === "d"}
-        posX={100}
-        posY={50}
-      >
+      <DiamondKey $isActive={activeKey === "d"} $posX={100} $posY={50}>
         D
       </DiamondKey>
       {/* S at bottom */}
-      <DiamondKey
-        isActive={activeKey === "s"}
-        posX={40}
-        posY={100}
-      >
+      <DiamondKey $isActive={activeKey === "s"} $posX={40} $posY={100}>
         S
       </DiamondKey>
     </DiamondContainer>

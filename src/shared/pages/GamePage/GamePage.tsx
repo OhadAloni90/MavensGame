@@ -19,7 +19,6 @@ import { UserReactionMessages } from "../../../utils/enums";
 import { useGameContext } from "../../../providers/GameContext";
 import { GameState } from "../../../utils/types/gameTypes";
 import theme from "../../../themes";
-import KeyboardDisplay from "../../components/KeyboardDisplay/DiamondKeyboardDisplay";
 import DiamondKeyboard from "../../components/KeyboardDisplay/DiamondKeyboardDisplay";
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomDelay = () => Math.floor(Math.random() * 3000) + 2000;
@@ -35,7 +34,7 @@ export default function GamePage() {
   const { showToast, state, dispatch } = useGameContext();
   const navigate = useNavigate();
   const showToastRef = useRef(showToast);
-
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   // Game state variables.
   const [gameState, setGameState] = useState<GameState>("WAITING");
   const [score, setScore] = useState<number>(0);
@@ -52,6 +51,7 @@ export default function GamePage() {
       if (gameStateRef.current === "WAITING" && !tooSoonToastShownRef.current) {
         const key = e.key.toLowerCase();
         if (["a", "d", "w", "s"].includes(key)) {
+          playSound('/sounds/error.mp3')
           tooSoonToastShownRef.current = true;
           showToastRef.current(UserReactionMessages["TooSoon"], "error");
         }
@@ -153,10 +153,17 @@ export default function GamePage() {
   };
 
   const playSound = (src: string) => {
+    if (currentAudioRef.current && !currentAudioRef.current.paused) {
+      // A sound is already playing, do nothing.
+      return;
+    }
     const audio = new Audio(src);
+    currentAudioRef.current = audio;
     audio.play().catch((err) => console.error("Audio play error:", err));
+    audio.addEventListener("ended", () => {
+      currentAudioRef.current = null;
+    });
   };
-
   const saveScore = async (success: boolean) => {
     try {
       await fetch(`${BASE_URL}/api/saveScore`, {
@@ -190,7 +197,6 @@ export default function GamePage() {
     setRestartCount((prev) => prev + 1);
     setDifficulty(null); // Reset difficulty so selection UI appears again
   };
-
   // If difficulty is not set, show the selection UI:
   if (difficulty === null) {
     return (
@@ -276,7 +282,6 @@ export default function GamePage() {
                 onClick={handleRestart}
               />
             </Box>
-
           </StyledGameEndedBox>
         )}
       </StyledGameContainer>
