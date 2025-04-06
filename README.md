@@ -3,7 +3,7 @@
 ## Pick the right side based on an indicator
 ----------
 
-1) To run game -> Clonde the git.
+1) To run game -> Clone the git.
 2) Enter the root dir of the project (mavensgame)
 3) run npm run build OR npm run dev
 4) if you used the build command (npm run build), type "npm run preview"
